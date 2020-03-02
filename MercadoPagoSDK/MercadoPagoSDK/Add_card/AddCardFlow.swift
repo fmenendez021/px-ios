@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import MLCardForm
 
 @objc public protocol AddCardFlowProtocol {
     func addCardFlowSucceded(result: [String: Any])
@@ -71,6 +72,8 @@ public class AddCardFlow: NSObject, PXFlow {
             self.navigationHandler.presentLoading()
         }
         switch self.model.nextStep() {
+        case .newCardForm:
+            self.openMLCardForm()
         case .getPaymentMethods:
             self.getPaymentMethods()
         case .getIdentificationTypes:
@@ -280,4 +283,26 @@ public class AddCardFlow: NSObject, PXFlow {
         ThemeManager.shared.applyAppNavBarStyle(navigationController: self.navigationHandler.navigationController)
     }
 
+}
+
+//MARK: ML Card Form
+extension AddCardFlow: MLCardFormLifeCycleDelegate {
+    private func openMLCardForm() {
+        let builder: MLCardFormBuilder
+        builder = MLCardFormBuilder(privateKey: accessToken, siteId: "MLA", flowId: PXConfiguratorManager.biometricConfig.flowIdentifier, lifeCycleDelegate: self)
+        builder.setLanguage(Localizator.sharedInstance.getLanguage())
+        //            builder.setExcludedPaymentTypes(viewModel.excludedPaymentTypeIds)
+        builder.setNavigationBarCustomColor(backgroundColor: ThemeManager.shared.navigationBar().backgroundColor, textColor: ThemeManager.shared.navigationBar().tintColor)
+        builder.setAnimated(false)
+        let cardFormVC = MLCardForm(builder: builder).setupController()
+        self.navigationHandler.pushViewController(cleanCompletedCheckouts: false, targetVC: cardFormVC, animated: true)
+    }
+
+    public func didAddCard(cardID: String) {
+        self.delegate?.addCardFlowSucceded(result: [:])
+    }
+
+    public func didFailAddCard() {
+        self.delegate?.addCardFlowFailed(shouldRestart: false)
+    }
 }

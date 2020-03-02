@@ -18,9 +18,11 @@ class AddCardFlowModel: NSObject, PXFlowModel {
     var associateCardResult: [String: Any]?
     var lastStepFailed = false
     var skipCongrats = false
+    var shouldUseNewCardForm = true
 
     enum Steps: Int {
         case start
+        case newCardForm
         case getPaymentMethods
         case getIdentificationTypes
         case openCardForm
@@ -40,7 +42,13 @@ class AddCardFlowModel: NSObject, PXFlowModel {
         }
         switch currentStep {
         case .start:
-            currentStep = .getPaymentMethods
+            if shouldUseNewCardForm {
+                currentStep = .newCardForm
+            } else {
+                currentStep = .getPaymentMethods
+            }
+        case .newCardForm:
+            currentStep = .showCongrats
         case .getPaymentMethods:
             currentStep = .getIdentificationTypes
         case .getIdentificationTypes:

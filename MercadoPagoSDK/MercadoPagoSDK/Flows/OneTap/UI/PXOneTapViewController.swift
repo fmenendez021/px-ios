@@ -496,7 +496,7 @@ extension PXOneTapViewController: PXCardSliderProtocol {
     }
 
     func addNewCardDidTap() {
-        if viewModel.shouldUseOldCardForm() {
+        if true {
             callbackPaymentData(viewModel.getClearPaymentData())
         } else {
             let builder: MLCardFormBuilder
